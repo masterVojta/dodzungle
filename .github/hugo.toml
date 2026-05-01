@@ -1,0 +1,10 @@
+baseURL = "/"
+theme = "blowfish"
+defaultContentLanguage = "en"
+
+[configDir]
+  default = "config"
+
+[module]
+  [[module.imports]]
+    path = "github.com/nunocoracao/blowfish/v2"
