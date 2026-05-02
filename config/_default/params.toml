@@ -18,7 +18,7 @@ enableCodeCopy = true
 [header]
   layout = "basic" # valid options: basic, fixed
   showLogo = true
-  logo = "img/logo.png" # Cesta relativní ke složce assets
+  logo = "img/logo_ghecco.png" # Cesta relativní ke složce assets
 
 [footer]
  # showMenu = true
