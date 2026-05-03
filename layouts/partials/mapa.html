@@ -1,0 +1,11 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div id="map" style="height: 400px; width: 100%;"></div>
+<script>
+  var map = L.map('map').setView([15.87, 100.99], 5); // Střed Thajska
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  // Přidání bodu (Khao Sok)
+  L.marker([8.91, 98.52]).addTo(map)
+    .bindPopup('<b>Khao Sok</b><br>Nejstarší prales.');
+</script>
