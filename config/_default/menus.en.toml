@@ -13,6 +13,11 @@
   url = "/sluzby/"
   weight = 3
 
+  [[main]]
+  name = "Země"
+  pageRef = "zeme"
+  weight = 30
+
 [[main]]
   name = "Kontakt"
   url = "/kontakt/"
