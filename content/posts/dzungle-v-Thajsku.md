@@ -1,5 +1,6 @@
 ---
 title: "Jak se vypravit do Thajska do džungle"
+zeme: ["thajsko"]
 date: 2026-05-01
 description: "Objevte starobylé deštné pralesy Khao Sok, divoké slony v Khao Yai nebo mlžné hory Doi Inthanon."
 Průvodce: Do hloubi džungle v parcích jako Khao Sok nebo Khao Yai důrazně doporučuji vzít si místního průvodce – vědí, kde jsou zvířata a jak se bezpečně pohybovat"
