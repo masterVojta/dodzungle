@@ -5,3 +5,8 @@ defaultContentLanguage = "en"
 
 [configDir]
   default = "config"
+
+  [taxonomies]
+  category = "categories"
+  tag = "tags"
+  zeme = "zeme"
