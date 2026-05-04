@@ -11,9 +11,6 @@ defaultContentLanguage = "en"
   tag = "tags"
   zeme = "zeme"
 
-[markup.goldmark.renderer]
-  unsafe = true
-
   [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]
