@@ -1,9 +1,7 @@
 
 ---
-title: "Vítejte v džungli"
-description: "Moje cesta začíná právě tady."
+title: "Mapa destinací"
+description: "Přehled zemí, kam můžeš jet"
 ---
 
-Tohle je moje úvodní stránka. Džungle je hluboká, ale my se v ní neztratíme!
-
-{{< world-map title="Cestuj zde" color="#2563eb" >}}
+{{</* world-map title="Kam můžeš jet?" color="#e63946" >}}
