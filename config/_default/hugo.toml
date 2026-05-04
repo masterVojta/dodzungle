@@ -9,7 +9,7 @@ defaultContentLanguage = "en"
 [taxonomies]
   category = "categories"
   tag = "tags"
-  zeme = "zeme"
+  zeme = "země"
 
   [markup]
   [markup.goldmark]
