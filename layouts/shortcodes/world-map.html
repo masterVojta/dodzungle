@@ -1,3 +1,293 @@
-layouts/
-  shortcodes/
-    world-map.html  
+{{/* ============================================================
+  SHORTCODE: world-map
+  Soubor:    layouts/shortcodes/world-map.html
+
+  SVG mapa:  static/images/world.svg  ← zkopíruj tam world.svg
+
+  Použití v Markdown:
+    {{< world-map >}}
+    {{< world-map title="Naše partnerské země" color="#e63946" >}}
+
+  Parametry:
+    title  – nadpis (výchozí: "Kam můžeš jet?")
+    color  – barva aktivních zemí, HEX (výchozí: "#e63946")
+============================================================ */}}
+
+{{ $title := .Get "title" | default "Kam můžeš jet?" }}
+{{ $color := .Get "color" | default "#e63946" }}
+
+<div id="wm-root">
+<style>
+#wm-root {
+  --wm-active:  {{ $color }};
+  --wm-hover:   {{ $color }}cc;
+  --wm-land:    #d9d9d9;
+  --wm-border:  #ffffff;
+  font-family: inherit;
+  width: 100%;
+  margin: 2rem 0;
+}
+@media (prefers-color-scheme: dark) {
+  #wm-root { --wm-land: #3f3f46; --wm-border: #18181b; }
+}
+
+/* záhlaví */
+#wm-root .wm-head {
+  display: flex; align-items: baseline;
+  justify-content: space-between; flex-wrap: wrap;
+  gap: .5rem; margin-bottom: 1rem;
+}
+#wm-root .wm-head h3 { margin: 0; font-size: 1.4rem; font-weight: 600; }
+#wm-root .wm-badge   { font-size: .85rem; color: #6b7280; }
+#wm-root .wm-badge strong { font-size: 1.3rem; font-weight: 700; color: var(--wm-active); }
+
+/* filtry */
+#wm-root .wm-filters { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+#wm-root .wm-filters button {
+  padding: .3rem .85rem; border-radius: 999px;
+  border: 1.5px solid var(--wm-active); background: transparent;
+  color: var(--wm-active); font-size: .78rem; font-weight: 500;
+  cursor: pointer; font-family: inherit; line-height: 1.5;
+  transition: background .15s, color .15s;
+}
+#wm-root .wm-filters button:hover,
+#wm-root .wm-filters button.on { background: var(--wm-active); color: #fff; }
+
+/* mapa */
+#wm-root .wm-wrap {
+  width: 100%; border-radius: 10px; overflow: hidden;
+  background: #f0f4f8;
+}
+@media (prefers-color-scheme: dark) { #wm-root .wm-wrap { background: #1e293b; } }
+
+#wm-root .wm-wrap svg { display: block; width: 100%; height: auto; }
+
+/* styly zemí – přepisujeme inline fill ze SVG */
+#wm-root .wm-wrap svg path {
+  fill: var(--wm-land) !important;
+  stroke: var(--wm-border) !important;
+  stroke-width: .3 !important;
+  transition: fill .18s;
+  cursor: default;
+}
+#wm-root .wm-wrap svg path.wm-dest {
+  fill: var(--wm-active) !important;
+  cursor: pointer;
+}
+#wm-root .wm-wrap svg path.wm-dest:hover { fill: var(--wm-hover) !important; }
+#wm-root .wm-wrap svg path.wm-dim  { opacity: .35 !important; }
+
+/* tooltip */
+#wm-tip {
+  position: fixed; pointer-events: none;
+  background: #1f2937; color: #f9fafb;
+  padding: .35rem .8rem; border-radius: 6px;
+  font-size: .78rem; font-weight: 500; white-space: nowrap;
+  z-index: 9999; opacity: 0; transition: opacity .12s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+#wm-tip.show { opacity: 1; }
+
+/* legenda */
+#wm-root .wm-legend {
+  display: flex; gap: 1.2rem; flex-wrap: wrap;
+  margin-top: .6rem; font-size: .78rem; color: #6b7280;
+}
+#wm-root .wm-legend span { display: flex; align-items: center; gap: .35rem; }
+#wm-root .wm-legend i {
+  display: inline-block; width: 13px; height: 13px;
+  border-radius: 3px; flex-shrink: 0;
+}
+</style>
+
+<!-- záhlaví -->
+<div class="wm-head">
+  <h3>{{ $title }}</h3>
+  <div class="wm-badge">Zemí: <strong id="wm-count">0</strong></div>
+</div>
+
+<!-- filtry -->
+<div class="wm-filters">
+  <button class="on" data-g="all">Vše</button>
+  <button data-g="europe">Evropa</button>
+  <button data-g="americas">Amerika</button>
+  <button data-g="asia">Asie &amp; Oceánie</button>
+  <button data-g="africa">Afrika</button>
+</div>
+
+<!-- mapa -->
+<div class="wm-wrap" id="wm-map-wrap">
+  <svg viewBox="0 0 2000 857" xmlns="http://www.w3.org/2000/svg">
+    <text x="1000" y="430" text-anchor="middle" fill="#9ca3af" font-size="28">Načítám mapu…</text>
+  </svg>
+</div>
+
+<div id="wm-tip"></div>
+
+<!-- legenda -->
+<div class="wm-legend">
+  <span><i style="background:var(--wm-active)"></i>Naše destinace</span>
+  <span><i style="background:var(--wm-land)"></i>Ostatní země</span>
+</div>
+
+</div><!-- #wm-root -->
+
+<script>
+(function () {
+"use strict";
+
+const DEST = {
+  /* ── Evropa ─────────────────────────────────────────── */
+  "France":             { name:"Francie",            label:"Paříž, Lyon, Bordeaux",          group:"europe"   },
+  "Germany":            { name:"Německo",             label:"Berlín, Mnichov, Hamburk",        group:"europe"   },
+  "Italy":              { name:"Itálie",              label:"Řím, Milán, Florencie",           group:"europe"   },
+  "Spain":              { name:"Španělsko",           label:"Madrid, Barcelona, Sevilla",      group:"europe"   },
+  "Greece":             { name:"Řecko",               label:"Atény, Soluň",                    group:"europe"   },
+  "Norway":             { name:"Norsko",              label:"Oslo, Bergen",                    group:"europe"   },
+  "Denmark":            { name:"Dánsko",              label:"Kodaň, Aarhus",                   group:"europe"   },
+  "United Kingdom":     { name:"Velká Británie",      label:"Londýn, Edinburgh",               group:"europe"   },
+  "Russian Federation": { name:"Rusko",               label:"Moskva, Petrohrad",               group:"europe"   },
+  "AT":                 { name:"Rakousko",            label:"Vídeň, Graz, Salzburg",           group:"europe"   },
+  "BE":                 { name:"Belgie",              label:"Brusel, Gent, Antverpy",          group:"europe"   },
+  "BG":                 { name:"Bulharsko",           label:"Sofie, Plovdiv",                  group:"europe"   },
+  "BY":                 { name:"Bělorusko",           label:"Minsk",                           group:"europe"   },
+  "CH":                 { name:"Švýcarsko",           label:"Ženeva, Curych, Bern",            group:"europe"   },
+  "CZ":                 { name:"Česká republika",     label:"Praha, Brno",                     group:"europe"   },
+  "EE":                 { name:"Estonsko",            label:"Tallinn, Tartu",                  group:"europe"   },
+  "FI":                 { name:"Finsko",              label:"Helsinky, Tampere",               group:"europe"   },
+  "HR":                 { name:"Chorvatsko",          label:"Záhřeb, Split",                   group:"europe"   },
+  "HU":                 { name:"Maďarsko",            label:"Budapešť, Debrecen",              group:"europe"   },
+  "IE":                 { name:"Irsko",               label:"Dublin, Cork",                    group:"europe"   },
+  "IS":                 { name:"Island",              label:"Reykjavík",                       group:"europe"   },
+  "LT":                 { name:"Litva",               label:"Vilnius, Kaunas",                 group:"europe"   },
+  "LU":                 { name:"Lucembursko",         label:"Lucemburk",                       group:"europe"   },
+  "LV":                 { name:"Lotyšsko",            label:"Riga",                            group:"europe"   },
+  "MD":                 { name:"Moldavsko",           label:"Kišiněv",                         group:"europe"   },
+  "NL":                 { name:"Nizozemsko",          label:"Amsterdam, Rotterdam, Utrecht",   group:"europe"   },
+  "PL":                 { name:"Polsko",              label:"Varšava, Krakov, Wrocław",        group:"europe"   },
+  "PT":                 { name:"Portugalsko",         label:"Lisabon, Porto, Coimbra",         group:"europe"   },
+  "RO":                 { name:"Rumunsko",            label:"Bukurešť, Kluž-Napoca",           group:"europe"   },
+  "RS":                 { name:"Srbsko",              label:"Bělehrad, Novi Sad",              group:"europe"   },
+  "SE":                 { name:"Švédsko",             label:"Stockholm, Göteborg",             group:"europe"   },
+  "SI":                 { name:"Slovinsko",           label:"Lublaň, Maribor",                 group:"europe"   },
+  "SK":                 { name:"Slovensko",           label:"Bratislava, Košice",              group:"europe"   },
+  "UA":                 { name:"Ukrajina",            label:"Kyjev, Lvov, Charkov",            group:"europe"   },
+  /* ── Amerika ─────────────────────────────────────────── */
+  "United States":      { name:"USA",                 label:"New York, Boston, Los Angeles",   group:"americas" },
+  "Canada":             { name:"Kanada",              label:"Toronto, Vancouver, Montréal",    group:"americas" },
+  "Brazil":             { name:"Brazílie",            label:"São Paulo, Rio de Janeiro",       group:"americas" },
+  "Argentina":          { name:"Argentina",           label:"Buenos Aires, Córdoba",           group:"americas" },
+  "Chile":              { name:"Chile",               label:"Santiago de Chile, Valparaíso",   group:"americas" },
+  "MX":                 { name:"Mexiko",              label:"Ciudad de México, Guadalajara",   group:"americas" },
+  "CR":                 { name:"Kostarika",           label:"San José",                        group:"americas" },
+  "CO":                 { name:"Kolumbie",            label:"Bogotá, Medellín",                group:"americas" },
+  "PE":                 { name:"Peru",                label:"Lima, Cuzco",                     group:"americas" },
+  "CU":                 { name:"Kuba",                label:"Havana",                          group:"americas" },
+  "EC":                 { name:"Ekvádor",             label:"Quito, Guayaquil",                group:"americas" },
+  "UY":                 { name:"Uruguay",             label:"Montevideo",                      group:"americas" },
+  "VE":                 { name:"Venezuela",           label:"Caracas",                         group:"americas" },
+  /* ── Asie & Oceánie ──────────────────────────────────── */
+  "China":              { name:"Čína",                label:"Peking, Šanghaj, Guangzhou",      group:"asia"     },
+  "Japan":              { name:"Japonsko",            label:"Tokio, Ósaka, Kjóto",             group:"asia"     },
+  "Indonesia":          { name:"Indonésie",           label:"Jakarta, Bali, Surabaya",         group:"asia"     },
+  "Australia":          { name:"Austrálie",           label:"Sydney, Melbourne, Brisbane",     group:"asia"     },
+  "New Zealand":        { name:"Nový Zéland",         label:"Auckland, Wellington",            group:"asia"     },
+  "Malaysia":           { name:"Malajsie",            label:"Kuala Lumpur, Penang",            group:"asia"     },
+  "Philippines":        { name:"Filipíny",            label:"Manila, Cebu",                    group:"asia"     },
+  "Turkey":             { name:"Turecko",             label:"Istanbul, Ankara",                group:"asia"     },
+  "IN":                 { name:"Indie",               label:"Dillí, Bombaj, Bengalúru",        group:"asia"     },
+  "KR":                 { name:"Jižní Korea",         label:"Soul, Busan",                     group:"asia"     },
+  "KZ":                 { name:"Kazachstán",          label:"Almaty, Nur-Sultan",              group:"asia"     },
+  "TW":                 { name:"Tchaj-wan",           label:"Tchaj-pej",                       group:"asia"     },
+  "TH":                 { name:"Thajsko",             label:"Bangkok, Chiang Mai",             group:"asia"     },
+  "VN":                 { name:"Vietnam",             label:"Hanoj, Ho Či Minovo město",       group:"asia"     },
+  "IR":                 { name:"Írán",                label:"Teherán, Esfahan",                group:"asia"     },
+  "IL":                 { name:"Izrael",              label:"Tel Aviv, Jeruzalém",             group:"asia"     },
+  "SA":                 { name:"Saúdská Arábie",      label:"Rijád, Džidda",                   group:"asia"     },
+  /* ── Afrika ──────────────────────────────────────────── */
+  "EG":                 { name:"Egypt",               label:"Káhira, Alexandrie",              group:"africa"   },
+  "MA":                 { name:"Maroko",              label:"Casablanca, Marrákéš, Fes",       group:"africa"   },
+  "ZA":                 { name:"Jihoafrická rep.",    label:"Kapské město, Johannesburg",      group:"africa"   },
+  "NG":                 { name:"Nigérie",             label:"Lagos, Abuja",                    group:"africa"   },
+  "ET":                 { name:"Etiopie",             label:"Addis Abeba",                     group:"africa"   },
+  "KE":                 { name:"Keňa",                label:"Nairobi, Mombasa",                group:"africa"   },
+  "GH":                 { name:"Ghana",               label:"Accra, Kumasi",                   group:"africa"   },
+  "TZ":                 { name:"Tanzanie",            label:"Dar es Salaam, Zanzibar",         group:"africa"   },
+  "TN":                 { name:"Tunisko",             label:"Tunis, Sfax",                     group:"africa"   },
+};
+
+const wrap       = document.getElementById("wm-map-wrap");
+const tip        = document.getElementById("wm-tip");
+const countEl    = document.getElementById("wm-count");
+const filterBtns = document.querySelectorAll("#wm-root .wm-filters button");
+let activeGroup  = "all";
+
+fetch("/images/world.svg")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(svgText => {
+    wrap.innerHTML = svgText;
+    const svg = wrap.querySelector("svg");
+    if (!svg) return;
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+    svg.setAttribute("viewBox", "0 0 2000 857");
+    svg.style.cssText = "display:block;width:100%;height:auto";
+    initMap(svg);
+  })
+  .catch(() => {
+    wrap.innerHTML =
+      '<p style="padding:2rem;text-align:center;color:#9ca3af">' +
+      'Mapu se nepodařilo načíst. Zkontroluj, zda je soubor world.svg v adresáři static/images/' +
+      '</p>';
+  });
+
+function initMap(svg) {
+  svg.querySelectorAll("path").forEach(path => {
+    const byId  = DEST[path.getAttribute("id")    || ""];
+    const byCls = DEST[path.getAttribute("class") || ""];
+    const dest  = byId || byCls;
+    if (dest) {
+      path.classList.add("wm-dest");
+      path._wmDest  = dest;
+      path._wmGroup = dest.group;
+    }
+  });
+  applyFilter(svg);
+
+  svg.addEventListener("mousemove", e => {
+    const path = e.target.closest("path.wm-dest");
+    if (!path || !path._wmDest) { tip.classList.remove("show"); return; }
+    const d = path._wmDest;
+    tip.textContent = d.name + (d.label ? " — " + d.label : "");
+    tip.classList.add("show");
+    tip.style.left = (e.clientX + 14) + "px";
+    tip.style.top  = (e.clientY - 36) + "px";
+  });
+  svg.addEventListener("mouseleave", () => tip.classList.remove("show"));
+}
+
+function applyFilter(svg) {
+  const svgEl = svg || wrap.querySelector("svg");
+  if (!svgEl) return;
+  let n = 0;
+  svgEl.querySelectorAll("path").forEach(path => {
+    if (!path._wmDest) return;
+    const matches = activeGroup === "all" || path._wmGroup === activeGroup;
+    path.classList.toggle("wm-dest", matches);
+    path.classList.toggle("wm-dim",  !matches);
+    if (matches) n++;
+  });
+  countEl.textContent = n;
+}
+
+filterBtns.forEach(btn => {
+  btn.addEventListener("click", function () {
+    filterBtns.forEach(b => b.classList.remove("on"));
+    this.classList.add("on");
+    activeGroup = this.dataset.g;
+    applyFilter();
+  });
+});
+
+})();
+</script>
