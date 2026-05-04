@@ -15,6 +15,7 @@
 
   [[main]]
   name = "Země"
+  url = "/zeme/"
   pageRef = "zeme"
   weight = 30
 
