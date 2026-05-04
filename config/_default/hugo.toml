@@ -6,7 +6,10 @@ defaultContentLanguage = "en"
 [configDir]
   default = "config"
 
-  [taxonomies]
+[taxonomies]
   category = "categories"
   tag = "tags"
   zeme = "zeme"
+
+[markup.goldmark.renderer]
+  unsafe = true
