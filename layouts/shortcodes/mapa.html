@@ -1,21 +1,84 @@
+<!-- Načtení základního Leafletu -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div id="map" style="height: 500px; width: 100%; background: #f0f0f0; border-radius: 10px;"></div>
+<!-- Načtení doplňku pro shlukování bodů (to dělá ta čísla v kroužku jako na MUNI) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+<div id="map" style="height: 600px; width: 100%; background: #ffffff;"></div>
 
 <script>
-  function initMap() {
-    if (typeof L === 'undefined') {
-      setTimeout(initMap, 100); // Zkus to znovu za 100ms, pokud Leaflet ještě nedorazil
-      return;
-    }
-    var map = L.map('map').setView([15, 20], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  document.addEventListener("DOMContentLoaded", function() {
+    // 1. Inicializace mapy s omezeným zoomem (aby to vypadalo čistě)
+    var map = L.map('map', {
+      scrollWheelZoom: false,
+      minZoom: 2,
+      maxZoom: 10
+    }).setView([20, 10], 2);
+
+    // 2. MUNI STYL podkladu (CartoDB Positron - velmi světlý a čistý)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Testovací bod
-    L.marker([15.87, 100.99]).addTo(map).bindPopup('Thajsko');
-  }
-  initMap();
+    // Přidání hranic států a popisků (jemně šedé)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png').addTo(map);
+
+    // 3. Vytvoření clusterové skupiny (shlukování)
+    var markers = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true
+    });
+
+    // 4. Data tvých zemí (přidávej další řádky podle potřeby)
+    var data = [
+      { name: "Thajsko", lat: 15.87, lng: 100.99, link: "/zeme/thajsko/" },
+      { name: "Brazílie", lat: -14.23, lng: -51.92, link: "/zeme/brazilie/" },
+      { name: "Peru", lat: -9.19, lng: -75.01, link: "/zeme/peru/" }
+    ];
+
+    // 5. Stylizace bodů (markerů)
+    data.forEach(function(loc) {
+      var marker = L.marker([loc.lat, loc.lng]);
+      
+      // Akce na kliknutí (přesměrování na zemi)
+      marker.on('click', function() {
+        window.location.href = loc.link;
+      });
+
+      // Tooltip s názvem země při najetí myší
+      marker.bindTooltip("<b>" + loc.name + "</b>", {
+        direction: 'top',
+        className: 'muni-tooltip'
+      });
+
+      markers.addLayer(marker);
+    });
+
+    map.addLayer(markers);
+  });
 </script>
+
+<style>
+  /* Aby tooltipy vypadaly moderně jako na MUNI */
+  .muni-tooltip {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+  }
+  .leaflet-popup-tip { background: #000; }
+  
+  /* Barva shluků (těch kroužků s čísly) */
+  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+    background-color: rgba(0, 100, 255, 0.2);
+  }
+  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+    background-color: rgba(0, 100, 255, 0.6);
+    color: white;
+  }
+</style>
