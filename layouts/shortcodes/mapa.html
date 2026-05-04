@@ -1,34 +1,21 @@
-<div id="map" style="height: 500px; width: 100%; border-radius: 15px; z-index: 1;"></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div id="map" style="height: 500px; width: 100%; background: #f0f0f0; border-radius: 10px;"></div>
 
 <script>
-  // Počkáme, až se načte Leaflet
-  document.addEventListener("DOMContentLoaded", function() {
-    var map = L.map('map', { 
-        scrollWheelZoom: false,
-        minZoom: 2
-    }).setView([15, 20], 2); // Pohled na svět
-
+  function initMap() {
+    if (typeof L === 'undefined') {
+      setTimeout(initMap, 100); // Zkus to znovu za 100ms, pokud Leaflet ještě nedorazil
+      return;
+    }
+    var map = L.map('map').setView([15, 20], 2);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Tady definuješ země a odkazy na jejich podstránky
-    var locations = [
-      { name: "Thajsko", lat: 15.87, lng: 100.99, link: "/zeme/thajsko/" },
-      { name: "Brazílie", lat: -14.23, lng: -51.92, link: "/zeme/brazilie/" },
-      { name: "Peru", lat: -9.19, lng: -75.01, link: "/zeme/peru/" }
-    ];
-
-    locations.forEach(function(loc) {
-      var marker = L.marker([loc.lat, loc.lng]).addTo(map);
-      
-      // Místo bubliny uděláme přímý proklik při kliknutí na bod
-      marker.on('click', function() {
-        window.location.href = loc.link;
-      });
-
-      // Volitelně: Bublina při najetí myší
-      marker.bindTooltip("<b>" + loc.name + "</b>", { direction: 'top', offset: [0, -10] });
-    });
-  });
+    // Testovací bod
+    L.marker([15.87, 100.99]).addTo(map).bindPopup('Thajsko');
+  }
+  initMap();
 </script>
