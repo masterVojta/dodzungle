@@ -16,9 +16,10 @@ enableCodeCopy = true
 # robots = ""
 
 [header]
-  layout = "basic" # valid options: basic, fixed
+  layout = "basic"
   showLogo = true
-  logo = "img/logo_ghecco.png" # Cesta relativní ke složce assets
+  logo = "img/logo_ghecco.png" 
+  showName = true # Pokud chceš vedle loga i text "Do džungle"
 
 [footer]
  # showMenu = true
