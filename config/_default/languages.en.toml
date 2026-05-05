@@ -1,5 +1,3 @@
-title = "Do džungle"
-
 languageCode = "en"
 languageName = "English"
 weight = 1
@@ -14,9 +12,10 @@ title = "Do džungle"
 
 [params.author]
   name = "Do džungle"
-  image = "img/logo.png" # Pokud je v assets/img/logo.png, tohle bude fungovat
+  image = "img/logo.png"
   headline = "Cesta do džungle"
   bio = "Cesta do džungle"
+  
   # links = [
   #   { email = "mailto:hello@your_domain.com" },
   #   { link = "https://link-to-some-website.com/" },
