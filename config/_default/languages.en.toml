@@ -8,14 +8,14 @@ title = "Do džungle"
   displayName = "EN"
   isoCode = "en"
   rtl = false
-  # logo = "/img/logo.png"
+  # logo = "logo.png"
   description = "My awesome website"
   # copyright = "Copy, _right?_ :thinking_face:"
   dateFormat = "2 January 2006"
 
 [params.author]
   name = "Do džungle"
-  image = "img/logo.png"
+  image = "logo.png"
   headline = "Cesta do džungle"
   bio = "Cesta do džungle"
   # links = [
