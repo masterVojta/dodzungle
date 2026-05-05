@@ -8,16 +8,16 @@ title = "Do džungle"
   displayName = "EN"
   isoCode = "en"
   rtl = false
-  # logo = "logo.png"
+  image = "/img/logo.png" # <--- LOGO WEBU (v rohu)
   description = "My awesome website"
   # copyright = "Copy, _right?_ :thinking_face:"
   dateFormat = "2 January 2006"
 
 [params.author]
   name = "Do džungle"
-  #  image = "logo.png"
+image = "/img/logo.png"  # <--- OBRÁZEK AUTORA (pod článkem)
   headline = "Cesta do džungle"
-  bio = "Cesta do džungle"
+  bio = "Připrav se na cestu do džungle! ;) "
   # links = [
   #   { email = "mailto:hello@your_domain.com" },
   #   { link = "https://link-to-some-website.com/" },
