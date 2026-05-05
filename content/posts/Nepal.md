@@ -2,7 +2,7 @@
 title: "Moje první výprava do digitální džungle"
 date: 2026-05-01
 description: "Jak jsem zkrotil Huga a Cloudflare."
-featureAsset:  "kerinci.webp" # PŘIDEJ TENTO ŘÁDEK
+featureAsset:  "img/krater.webp"   # PŘIDEJ TENTO ŘÁDEK
 tags: ["hugo", "blog", "cesta"]
 draft: false
 ---
