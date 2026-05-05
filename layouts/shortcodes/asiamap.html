@@ -1,1 +1,169 @@
-#asiamap
+{{/* ============================================================
+  SHORTCODE: asia-map
+  Soubor:    layouts/shortcodes/asia-map.html
+
+  SVG mapa:  static/images/world.svg
+
+  Použití v Markdown:
+    {{< asia-map >}}
+    {{< asia-map title="Kam v Asii?" color="#22c55e" >}}
+============================================================ */}}
+
+{{ $title := .Get "title" | default "Kam v Asii?" }}
+{{ $color := .Get "color" | default "#22c55e" }}
+
+<div id="am-root">
+<style>
+#am-root {
+  --am-active:  {{ $color }};
+  --am-hover:   {{ $color }}cc;
+  --am-land:    #d9d9d9;
+  --am-border:  #ffffff;
+  font-family: inherit;
+  width: 100%;
+  max-width: 100%;
+  margin: 2rem auto;
+  box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) {
+  #am-root { --am-land: #3f3f46; --am-border: #18181b; }
+}
+
+#am-root .am-head {
+  display: flex; align-items: baseline;
+  justify-content: space-between; flex-wrap: wrap;
+  gap: .5rem; margin-bottom: 1rem;
+}
+#am-root .am-head h3 { margin: 0; font-size: 1.4rem; font-weight: 600; }
+#am-root .am-badge   { font-size: .85rem; color: #6b7280; }
+#am-root .am-badge strong { font-size: 1.3rem; font-weight: 700; color: var(--am-active); }
+
+#am-root .am-wrap {
+  width: 100%; border-radius: 10px; overflow: hidden;
+  background: #f0f4f8;
+}
+@media (prefers-color-scheme: dark) { #am-root .am-wrap { background: #1e293b; } }
+#am-root .am-wrap svg { display: block; width: 100%; height: auto; }
+
+#am-root .am-wrap svg path {
+  fill: var(--am-land) !important;
+  stroke: var(--am-border) !important;
+  stroke-width: .3 !important;
+  transition: fill .18s;
+  cursor: default;
+}
+#am-root .am-wrap svg path.am-dest {
+  fill: var(--am-active) !important;
+  cursor: pointer;
+}
+#am-root .am-wrap svg path.am-dest:hover { fill: var(--am-hover) !important; }
+
+#am-tip {
+  position: fixed; pointer-events: none;
+  background: #1f2937; color: #f9fafb;
+  padding: .35rem .8rem; border-radius: 6px;
+  font-size: .78rem; font-weight: 500; white-space: nowrap;
+  z-index: 9999; opacity: 0; transition: opacity .12s;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+#am-tip.show { opacity: 1; }
+
+#am-root .am-legend {
+  display: flex; gap: 1.2rem; flex-wrap: wrap;
+  margin-top: .6rem; font-size: .78rem; color: #6b7280;
+}
+#am-root .am-legend span { display: flex; align-items: center; gap: .35rem; }
+#am-root .am-legend i {
+  display: inline-block; width: 13px; height: 13px;
+  border-radius: 3px; flex-shrink: 0;
+}
+</style>
+
+<div class="am-head">
+  <h3>{{ $title }}</h3>
+  <div class="am-badge">Zemí: <strong id="am-count">0</strong></div>
+</div>
+
+<div class="am-wrap" id="am-map-wrap">
+  <svg viewBox="900 100 1100 650" xmlns="http://www.w3.org/2000/svg">
+    <text x="1450" y="430" text-anchor="middle" fill="#9ca3af" font-size="28">Načítám mapu…</text>
+  </svg>
+</div>
+
+<div id="am-tip"></div>
+
+<div class="am-legend">
+  <span><i style="background:var(--am-active)"></i>Naše destinace</span>
+  <span><i style="background:var(--am-land)"></i>Ostatní země</span>
+</div>
+
+</div><!-- #am-root -->
+
+<script>
+(function () {
+"use strict";
+
+// ── AKTIVNÍ ZEMĚ ──────────────────────────────────────────────
+// Přidej nebo odeber země podle potřeby.
+// Klíč = ISO-2 kód nebo anglický název (viz world-map.html)
+const DEST = {
+  "TH":        { name:"Thajsko",   label:"Bangkok, Chiang Mai" },
+  "Indonesia": { name:"Indonésie", label:"Bali, Jakarta"       },
+  "China":     { name:"Čína",      label:"Peking, Šanghaj"     },
+  "KH":        { name:"Kambodža",  label:"Siem Reap, Phnom Penh" },
+  "VN":        { name:"Vietnam",   label:"Hanoj, Ho Či Minovo město" },
+  "Malaysia":  { name:"Malajsie",  label:"Kuala Lumpur, Penang" },
+};
+
+const wrap    = document.getElementById("am-map-wrap");
+const tip     = document.getElementById("am-tip");
+const countEl = document.getElementById("am-count");
+
+fetch("/images/world.svg")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(svgText => {
+    wrap.innerHTML = svgText;
+    const svg = wrap.querySelector("svg");
+    if (!svg) return;
+    svg.removeAttribute("width");
+    svg.removeAttribute("height");
+    // viewBox oříznutý přesně na oblast Asie
+    svg.setAttribute("viewBox", "900 100 1100 650");
+    svg.style.cssText = "display:block;width:100%;height:auto";
+    initMap(svg);
+  })
+  .catch(() => {
+    wrap.innerHTML =
+      '<p style="padding:2rem;text-align:center;color:#9ca3af">' +
+      'Mapu se nepodařilo načíst. Zkontroluj, zda je soubor world.svg v adresáři static/images/' +
+      '</p>';
+  });
+
+function initMap(svg) {
+  let n = 0;
+  svg.querySelectorAll("path").forEach(path => {
+    const id   = path.getAttribute("id")    || "";
+    const cls  = path.getAttribute("class") || "";
+    const dest = DEST[id] || DEST[cls];
+    if (dest) {
+      path.classList.add("am-dest");
+      path._amDest = dest;
+      n++;
+    }
+  });
+  countEl.textContent = n;
+
+  svg.addEventListener("mousemove", e => {
+    const path = e.target.closest("path.am-dest");
+    if (!path || !path._amDest) { tip.classList.remove("show"); return; }
+    const d = path._amDest;
+    tip.textContent = d.name + (d.label ? " — " + d.label : "");
+    tip.classList.add("show");
+    tip.style.left = (e.clientX + 14) + "px";
+    tip.style.top  = (e.clientY - 36) + "px";
+  });
+  svg.addEventListener("mouseleave", () => tip.classList.remove("show"));
+}
+
+})();
+</script>
