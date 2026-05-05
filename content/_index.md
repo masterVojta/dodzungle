@@ -1,6 +1,5 @@
-
 ---
 title: "Mapa destinací"
 description: "Přehled zemí, kam můžeš jet"
 ---
-{{< world-map title="Kam můžeš jet?" color="#0891b2" >}}
+{{< asia-map title="Kam v Asii?" color="#0891b2" >}}
