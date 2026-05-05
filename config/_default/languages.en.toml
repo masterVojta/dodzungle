@@ -15,7 +15,7 @@ title = "Do džungle"
 
 [params.author]
   name = "Do džungle"
-  image = "logo.png"
+  #  image = "logo.png"
   headline = "Cesta do džungle"
   bio = "Cesta do džungle"
   # links = [
