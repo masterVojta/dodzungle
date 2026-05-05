@@ -4,20 +4,23 @@ weight = 1
 
 title = "Do džungle"
 
+languageCode = "en"
+languageName = "English"
+weight = 1
+title = "Do džungle"
+
 [params]
   displayName = "EN"
   isoCode = "en"
-  rtl = false
-  image = "/img/logo.png" # <--- LOGO WEBU (v rohu)
-  description = "My awesome website"
-  # copyright = "Copy, _right?_ :thinking_face:"
-  dateFormat = "2 January 2006"
+  name = "Do džungle"
+  logo = "img/logo.png"
+  description = "Cesta do džungle"
 
 [params.author]
   name = "Do džungle"
-image = "/img/logo.png"  # <--- OBRÁZEK AUTORA (pod článkem)
+  image = "img/logo.png" # Pokud je v assets/img/logo.png, tohle bude fungovat
   headline = "Cesta do džungle"
-  bio = "Připrav se na cestu do džungle! ;) "
+  bio = "Cesta do džungle"
   # links = [
   #   { email = "mailto:hello@your_domain.com" },
   #   { link = "https://link-to-some-website.com/" },
