@@ -31,7 +31,7 @@ enableCodeCopy = true
   showScrollToTop = true
 
 [homepage]
-  layout = "page"            # Změň na "page", pokud tam byla "profile"
+  layout = "background"            # Změň na "page", pokud tam byla "profile"
   showRecent = true     # TENTO ŘÁDEK JE KLÍČOVÝ - zapne výpis článků
   showRecentItems = 5   # Počet článků, které se mají ukázat
   showMoreLink = true   # Zobrazí odkaz "Všechny články"
