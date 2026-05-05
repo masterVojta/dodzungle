@@ -19,7 +19,7 @@ enableCodeCopy = true
 [header]
   layout = "basic"
   showLogo = true
-  # logo = "img/logo.png" 
+  logo = "/img/logo.png" 
   showName = true # Pokud chceš vedle loga i text "Do džungle"
   
 
