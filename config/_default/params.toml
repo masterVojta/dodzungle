@@ -32,7 +32,7 @@ enableCodeCopy = true
 
 [params]
   # ... tvé ostatní parametry jako logo atd.
-  homepageBackground = "img/background.webp" # Cesta k fotce v assets/img/
+  homepageBackground = "/img/background.webp" # Cesta k fotce v assets/img/
 
 [homepage]
   layout = "background"            # Změň na "page", pokud tam byla "profile"
