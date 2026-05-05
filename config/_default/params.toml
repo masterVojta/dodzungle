@@ -37,8 +37,8 @@ enableCodeCopy = true
   showMoreLink = true   # Zobrazí odkaz "Všechny články"
   showMoreLinkDest = "/posts"
   cardView = true       # Články budou v hezkých kartách s obrázky
-  cardViewScreenWidth = false
-  layoutBackgroundBlur = false # only used when layout equals background
+  cardViewScreenWidth = true # Toto roztáhne karty na max
+  layout = "page"            # Změň na "page", pokud tam byla "profile"
 
 
 
