@@ -31,14 +31,14 @@ enableCodeCopy = true
   showScrollToTop = true
 
 [homepage]
-  layout = "background" # Nebo "page", pokud nechceš obrázek na pozadí
+  layout = "page"            # Změň na "page", pokud tam byla "profile"
   showRecent = true     # TENTO ŘÁDEK JE KLÍČOVÝ - zapne výpis článků
   showRecentItems = 5   # Počet článků, které se mají ukázat
   showMoreLink = true   # Zobrazí odkaz "Všechny články"
   showMoreLinkDest = "/posts"
   cardView = true       # Články budou v hezkých kartách s obrázky
   cardViewScreenWidth = true # Toto roztáhne karty na max
-  layout = "page"            # Změň na "page", pokud tam byla "profile"
+
 
 
 
