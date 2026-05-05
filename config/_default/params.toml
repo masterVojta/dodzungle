@@ -30,6 +30,10 @@ enableCodeCopy = true
   showAppearanceSwitcher = true
   showScrollToTop = true
 
+[params]
+  # ... tvé ostatní parametry jako logo atd.
+  homepageBackground = "img/background.webp" # Cesta k fotce v assets/img/
+
 [homepage]
   layout = "background"            # Změň na "page", pokud tam byla "profile"
   showRecent = true     # TENTO ŘÁDEK JE KLÍČOVÝ - zapne výpis článků
@@ -40,8 +44,6 @@ enableCodeCopy = true
   cardViewScreenWidth = true # Toto roztáhne karty na max
 
 
-
-
 [article]
   showDate = true
   #showViews = true
@@ -49,7 +51,7 @@ enableCodeCopy = true
   showDateUpdated = false
   showAuthor = true
   showHero = true
-  heroStyle = "basic" # valid options: basic, big, background
+  heroStyle = "big" # valid options: basic, big, background --> 
   showBreadcrumbs = true
   showDraftLabel = true
   showEdit = false
